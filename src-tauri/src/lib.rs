@@ -5,7 +5,6 @@
  */
 
 /* TODO:
- * - remove boilerplate
  * - handle errors better with less .unwrap()
  */
 
@@ -25,6 +24,10 @@ fn init_todo_list() -> () {
     if !fs::exists(TODO_PATH).unwrap() {
         let _ = File::create(TODO_PATH);
     }
+}
+
+fn update_todo_list(new_tasks: Vec<String>) -> () {
+    overwrite_todo_list(&serde_json::to_string(&TodoList { tasks: new_tasks }).unwrap());
 }
 
 fn read_todo_list() -> String {
@@ -58,8 +61,7 @@ fn submit_task(task: &str) -> () {
     let mut tasks: Vec<String> = get_tasks();
     tasks.append(&mut vec![String::from(task)]);
 
-    let todo_list: TodoList = TodoList { tasks: tasks };
-    overwrite_todo_list(&serde_json::to_string(&todo_list).unwrap());
+    update_todo_list(tasks);
 }
 
 #[tauri::command]
@@ -70,8 +72,7 @@ fn remove_task(task: &str) -> () {
     let index = tasks.iter().position(|x| *x == task).unwrap();
     tasks.remove(index);
 
-    let todo_list: TodoList = TodoList { tasks: tasks };
-    overwrite_todo_list(&serde_json::to_string(&todo_list).unwrap());
+    update_todo_list(tasks);
 }
 
 #[tauri::command]
