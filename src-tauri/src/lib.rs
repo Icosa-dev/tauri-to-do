@@ -5,18 +5,18 @@
  */
 
 /* TODO:
- * - use &str as input in functions over String
- * - use macros to remove boilerplate
+ * - remove boilerplate
+ * - handle errors better with less .unwrap()
  */
 
 use std::fs::{self, File, OpenOptions};
 use std::io::prelude::*;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 struct TodoList {
-    tasks: Vec<String>
+    tasks: Vec<String>,
 }
 
 const TODO_PATH: &str = "todo.json";
@@ -42,7 +42,7 @@ fn read_todo_list() -> String {
     content
 }
 
-fn overwrite_todo_list(content: String) -> () {
+fn overwrite_todo_list(content: &str) -> () {
     let mut file: File = File::create(TODO_PATH).unwrap();
 
     match file.write(content.as_bytes()) {
@@ -52,18 +52,18 @@ fn overwrite_todo_list(content: String) -> () {
 }
 
 #[tauri::command]
-fn submit_task(task: String) -> () {
+fn submit_task(task: &str) -> () {
     init_todo_list();
 
     let mut tasks: Vec<String> = get_tasks();
-    tasks.append(&mut vec![task]);
+    tasks.append(&mut vec![String::from(task)]);
 
     let todo_list: TodoList = TodoList { tasks: tasks };
-    overwrite_todo_list(serde_json::to_string(&todo_list).unwrap());
+    overwrite_todo_list(&serde_json::to_string(&todo_list).unwrap());
 }
 
 #[tauri::command]
-fn remove_task(task: String) -> () {
+fn remove_task(task: &str) -> () {
     init_todo_list();
 
     let mut tasks: Vec<String> = get_tasks();
@@ -71,7 +71,7 @@ fn remove_task(task: String) -> () {
     tasks.remove(index);
 
     let todo_list: TodoList = TodoList { tasks: tasks };
-    overwrite_todo_list(serde_json::to_string(&todo_list).unwrap());
+    overwrite_todo_list(&serde_json::to_string(&todo_list).unwrap());
 }
 
 #[tauri::command]
