@@ -1,9 +1,3 @@
-/*
- * Copyright (c) 2026 LJC
- *
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
-
 /* TODO:
  * - handle errors better with less .unwrap()
  * - migrate persistent data handling to a KVDB
