@@ -6,6 +6,8 @@
 
 /* TODO:
  * - handle errors better with less .unwrap()
+ * - migrate persistent data handling to a KVDB
+ * - add more documentation
  */
 
 use std::fs::{self, File, OpenOptions};
