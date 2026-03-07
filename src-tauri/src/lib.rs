@@ -1,19 +1,33 @@
 /* TODO:
- * - handle errors better with less .unwrap()
  * - migrate persistent data handling to a KVDB
  * - add more documentation
  */
 
 use std::fs::{self, File, OpenOptions};
 use std::io::prelude::*;
-
 use serde::{Deserialize, Serialize};
 
+// NOTE:
+// If a cvs file parsing library exists
+// already it would make more sense
+// for the tasks to be stored in that
+// format.
+
+// TODO:
+// Helper code that isn't accessable
+// to the frontend should be held in
+// a seperate file.
+
+/// An object representing the 
+/// data stored in the user's
+/// `todo.json` file.
 #[derive(Serialize, Deserialize)]
 struct TodoList {
     tasks: Vec<String>,
 }
 
+/// The path to the JSON file which 
+/// holds the user's tasks.
 const TODO_PATH: &str = "todo.json";
 
 fn init_todo_list() -> () {
@@ -22,10 +36,16 @@ fn init_todo_list() -> () {
     }
 }
 
+/// Overwrites the tasks in the user's 
+/// `todo.json` file with the values 
+/// supplied to by the `new_tasks`
+/// parameter.
 fn update_todo_list(new_tasks: Vec<String>) -> () {
     overwrite_todo_list(&serde_json::to_string(&TodoList { tasks: new_tasks }).unwrap());
 }
 
+/// Returns the contents of the user's
+/// `todo.json` file as a String.
 fn read_todo_list() -> String {
     let mut file: File = match OpenOptions::new().read(true).open(TODO_PATH) {
         Ok(f) => f,
@@ -41,6 +61,9 @@ fn read_todo_list() -> String {
     content
 }
 
+/// Overwrites the data in the user's `todo.json`
+/// file with the text supplied by the `content`
+/// parameter.
 fn overwrite_todo_list(content: &str) -> () {
     let mut file: File = File::create(TODO_PATH).unwrap();
 
@@ -50,6 +73,8 @@ fn overwrite_todo_list(content: &str) -> () {
     };
 }
 
+/// Adds a task to tasks in the user's
+/// `todo.json` file.
 #[tauri::command]
 fn submit_task(task: &str) -> () {
     init_todo_list();
@@ -60,6 +85,8 @@ fn submit_task(task: &str) -> () {
     update_todo_list(tasks);
 }
 
+/// Removes a task from tasks in the user's
+/// `todo.json` file.
 #[tauri::command]
 fn remove_task(task: &str) -> () {
     init_todo_list();
@@ -71,6 +98,8 @@ fn remove_task(task: &str) -> () {
     update_todo_list(tasks);
 }
 
+/// Returns all tasks from the user's
+/// `todo.json` file.
 #[tauri::command]
 fn get_tasks() -> Vec<String> {
     init_todo_list();
